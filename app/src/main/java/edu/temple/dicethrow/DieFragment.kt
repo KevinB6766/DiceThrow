@@ -5,19 +5,29 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import kotlin.random.Random
 
 class DieFragment : Fragment() {
 
-    val DIESIDE = "sidenumber"
+    private val DIESIDE = "sidenumber"
+    private val PREVIOUS_ROLE= "previousrole"
+    private var currentROLE= 0
+    private lateinit var dieTextView: TextView
+    private var dieSides: Int = 6
 
-    val PREVIOUS_ROLE= "previousrole"
-    var currentROLE= 0
-
-    lateinit var dieTextView: TextView
-
-    var dieSides: Int = 6
+    // Factory method to create an instance of DieFragment with specified die sides
+    companion object {
+        fun newInstance(sides: Int = 6): DieFragment {
+            val fragment = DieFragment()
+            val args = Bundle()
+            args.putInt(DIESIDE, sides)
+            fragment.arguments = args
+            return fragment
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,6 +51,10 @@ class DieFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Prompt user for die sides
+
+        promptForDieSides()
+
         if(savedInstanceState == null)
             throwDie()
         else {
@@ -57,5 +71,19 @@ class DieFragment : Fragment() {
     fun throwDie() {
         currentROLE = (Random.nextInt(dieSides)+1)
         dieTextView.text = currentROLE.toString()
+    }
+    private fun promptForDieSides() {
+        val builder = AlertDialog.Builder(requireContext())
+        builder.setTitle("Enter Number of Sides for the Die")
+        // Set up the input
+        val input = EditText(requireContext())
+        builder.setView(input)
+        // Set up the buttons
+        builder.setPositiveButton("OK") { dialog, which ->
+            val inputValue = input.text.toString()
+            dieSides = inputValue.toIntOrNull() ?: 6 // Default to 6 if input is invalid
+        }
+        builder.setNegativeButton("Cancel") { dialog, which -> dialog.cancel() }
+        builder.show()
     }
 }
