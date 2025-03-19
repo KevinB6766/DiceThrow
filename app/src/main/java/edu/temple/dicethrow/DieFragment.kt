@@ -12,7 +12,6 @@ import kotlin.random.Random
 
 class DieFragment : Fragment() {
 
-    private val DIESIDE = "sidenumber"
     private val PREVIOUS_ROLE= "previousrole"
     private var currentROLE= 0
     private lateinit var dieTextView: TextView
@@ -20,6 +19,7 @@ class DieFragment : Fragment() {
 
     // Factory method to create an instance of DieFragment with specified die sides
     companion object {
+        private val DIESIDE = "sidenumber"
         fun newInstance(sides: Int = 6): DieFragment {
             val fragment = DieFragment()
             val args = Bundle()
