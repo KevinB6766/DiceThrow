@@ -6,27 +6,28 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import kotlin.random.Random
+import androidx.lifecycle.ViewModelProvider
 
 class DieFragment : Fragment() {
 
-    val DIESIDE = "sidenumber"
-
-    val PREVIOUS_ROLE= "previousrole"
-    var currentROLE= 0
-
-    lateinit var dieTextView: TextView
-
-    var dieSides: Int = 6
+    private val dieSIDE = "side_number"
+    private val currentROLE = "current_role"
+    private lateinit var dieTextView: TextView
+    private var dieSides: Int = 6
+    private var currentRole: Int? = null
+    private lateinit var dieViewModel: DieViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            it.getInt(DIESIDE).run {
-                dieSides = this
-            }
+            dieSides = it.getInt(dieSIDE, 6)
         }
+        savedInstanceState?.let {
+            currentRole = it.getInt(currentROLE)
+        }
+        dieViewModel = ViewModelProvider(requireActivity())[DieViewModel::class.java]
     }
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -39,23 +40,24 @@ class DieFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
 
-        if(savedInstanceState == null)
-            throwDie()
-        else {
-            currentROLE = savedInstanceState.getInt(PREVIOUS_ROLE)
-            dieTextView.text = currentROLE.toString()
+        dieViewModel.getCurrentROLL().observe(viewLifecycleOwner) {
+            dieTextView.text = it.toString()
         }
+        if (dieViewModel.getCurrentROLL().value == null)
+            dieViewModel.rollDie()
+    }
+    companion object {
+        fun newInstance(sides: Int = 6) =
+            DieFragment().apply {
+                arguments = Bundle().apply {
+                    putInt(dieSIDE, sides)
+                }
+            }
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putInt(PREVIOUS_ROLE, currentROLE)
-    }//save current die roll
-
-    fun throwDie() {
-        currentROLE = (Random.nextInt(dieSides)+1)
-        dieTextView.text = currentROLE.toString()
-    }
 }
+
+
+
+
